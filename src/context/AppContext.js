@@ -3,9 +3,9 @@ import React, { createContext, useReducer } from 'react';
 // 5. The reducer - this is used to update the state, based on the action
 export const AppReducer = (state, action) => {
     let budget = 0;
+    let total_budget = 0;
     switch (action.type) {
         case 'ADD_EXPENSE':
-            let total_budget = 0;
             total_budget = state.expenses.reduce(
                 (previousExp, currentExp) => {
                     return previousExp + currentExp.cost
@@ -27,7 +27,7 @@ export const AppReducer = (state, action) => {
             } else {
                 alert("Cannot increase the allocation! Out of funds");
                 return {
-                    ...state
+                    ...state,
                 }
             }
         case 'RED_EXPENSE':
@@ -44,22 +44,31 @@ export const AppReducer = (state, action) => {
                 expenses: [...red_expenses],
             };
         case 'DELETE_EXPENSE':
-        action.type = "DONE";
-        state.expenses.map((currentExp)=> {
-            if (currentExp.name === action.payload) {
-                budget = state.budget + currentExp.cost
-                currentExp.cost =  0;
-            }
-            return currentExp
-        })
-        action.type = "DONE";
-        return {
-            ...state,
-            budget
-        };
+            action.type = "DONE";
+            state.expenses.map((currentExp)=> {
+                if (currentExp.name === action.payload) {
+                    budget = state.budget + currentExp.cost
+                    currentExp.cost =  0;
+                }
+                return currentExp
+            })
+            action.type = "DONE";
+            return {
+                ...state,
+                budget
+            };
         case 'SET_BUDGET':
             action.type = "DONE";
-            state.budget = action.payload;
+            total_budget = state.expenses.reduce(
+                (previousExp, currentExp) => {
+                    return previousExp + currentExp.cost
+                },0
+            );
+            if(total_budget <= action.payload) {
+                state.budget = action.payload;
+            } else {
+                alert("You cannot decrease the budget lower than the spending.");
+            }
 
             return {
                 ...state,
